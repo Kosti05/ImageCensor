@@ -17,38 +17,42 @@ class MainFrame(wx.Frame):
         self.SetMinSize((1000, 600))
 
         # Add Labels
-        self.files_label = wx.StaticText(panel, id=1, label="%s files loaded." % len(images), pos=(10, 15),
+        self.files_label = wx.StaticText(panel, id=1, label="%s files loaded." % len(images), pos=(10, 30),
                                          size=wx.DefaultSize, style=0, name="files_label")
 
         font = wx.Font(14, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
         small_font = wx.Font(7, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
         self.files_label.SetFont(font)
         
-        self.out_dir_label = wx.StaticText(panel, id=1, label="Output Directory:", pos=(800, 15),
+        self.out_dir_label = wx.StaticText(panel, id=1, label="Output Directory:", pos=(800, 30),
                                          size=wx.DefaultSize, style=0, name="out_dir_label")
 
         self.out_dir_label.SetFont(font)
         
-        self.out_dir = wx.StaticText(panel, id=1, label="No Output Directory selected.", pos=(810, 37),
+        self.out_dir = wx.StaticText(panel, id=1, label="No Output Directory selected.", pos=(810, 55),
                                          size=wx.DefaultSize, style=0, name="out_dir")
 
         self.out_dir.SetFont(small_font)
 
         # Add Buttons
-        files_btn = wx.Button(panel, label='Add Files...', pos=(10, 50))
+        files_btn = wx.Button(panel, label='Add Files...', pos=(10, 70))
         files_btn.Bind(wx.EVT_BUTTON, self.files_btn_on_press)
 
-        dir_btn = wx.Button(panel, label='Add Directory...', pos=(90, 50))
+        dir_btn = wx.Button(panel, label='Add Directory...', pos=(90, 70))
         dir_btn.Bind(wx.EVT_BUTTON, self.dir_btn_on_press)
 
-        clear_btn = wx.Button(panel, label='Clear', pos=(195, 50))
+        clear_btn = wx.Button(panel, label='Clear', pos=(195, 70))
         clear_btn.Bind(wx.EVT_BUTTON, self.clear_btn_on_press)
         
-        out_dir_btn = wx.Button(panel, label='Set Output Directory', pos=(770, 50))
+        out_dir_btn = wx.Button(panel, label='Set Output Directory', pos=(770, 70))
         out_dir_btn.Bind(wx.EVT_BUTTON, self.out_dir_btn_on_press)
         
-        run_btn = wx.Button(panel, label='Run', pos=(900, 50))
+        run_btn = wx.Button(panel, label='Run', pos=(900, 70))
         run_btn.Bind(wx.EVT_BUTTON, self.run_btn_on_press)
+        
+        lblList = ['Plates', 'Faces', 'Both']     
+        self.rbox = wx.RadioBox(panel,label = 'Blur', pos = (770,110), choices = lblList ,
+        majorDimension = 1, style = wx.RA_SPECIFY_ROWS)
 
         # Final Setup
         # panel.SetSizer(v_sizer)
@@ -65,7 +69,6 @@ class MainFrame(wx.Frame):
             images.append(os.path.join(file_path))
         openFileDialog.Destroy()
         self.files_label.SetLabel("%s files loaded." % len(images))
-        print(len(images))
 
     def dir_btn_on_press(self, event):
         global images
@@ -73,10 +76,8 @@ class MainFrame(wx.Frame):
                                     wx.DD_DEFAULT_STYLE | wx.DD_DIR_MUST_EXIST)
         openDirDialog.ShowModal()
         selected_directory = openDirDialog.GetPath()
-        print("Selected Directory:", selected_directory)
         for file in os.listdir(selected_directory):
             if os.path.isfile(os.path.join(selected_directory, file)):
-                print("File:", file)
                 images.append("%s\\%s" % (selected_directory, file))
 
         openDirDialog.Destroy()
@@ -106,7 +107,15 @@ class MainFrame(wx.Frame):
                 dlg = wx.MessageDialog(None, "No output directory selected.",'Message',wx.OK | wx.ICON_QUESTION)
                 result = dlg.ShowModal()
         else:
-            detect.detect_licenseplates(images, output_dir, self)
+            if (self.rbox.GetStringSelection() == "Plates"):
+                detect.detect_licenseplates(images, output_dir, self)
+            elif (self.rbox.GetStringSelection() == "Faces"):
+                detect.detect_faces(images, output_dir, self)
+            elif (self.rbox.GetStringSelection() == "Both"):
+                detect.detect_both(images, output_dir, self)
+            
+            
+            
             images = []
             self.files_label.SetLabel("%s files loaded." % len(images))
                 
