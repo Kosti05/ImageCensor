@@ -2,9 +2,10 @@ import wx
 import os
 import detect
 
-version = "0.1"
+version = "0.2"
 
 images = []
+output_dir = ""
 
 class MainFrame(wx.Frame):
     def __init__(self):
@@ -20,7 +21,18 @@ class MainFrame(wx.Frame):
                                          size=wx.DefaultSize, style=0, name="files_label")
 
         font = wx.Font(14, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
+        small_font = wx.Font(7, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
         self.files_label.SetFont(font)
+        
+        self.out_dir_label = wx.StaticText(panel, id=1, label="Output Directory:", pos=(800, 15),
+                                         size=wx.DefaultSize, style=0, name="out_dir_label")
+
+        self.out_dir_label.SetFont(font)
+        
+        self.out_dir = wx.StaticText(panel, id=1, label="No Output Directory selected.", pos=(810, 37),
+                                         size=wx.DefaultSize, style=0, name="out_dir")
+
+        self.out_dir.SetFont(small_font)
 
         # Add Buttons
         files_btn = wx.Button(panel, label='Add Files...', pos=(10, 50))
@@ -31,6 +43,9 @@ class MainFrame(wx.Frame):
 
         clear_btn = wx.Button(panel, label='Clear', pos=(195, 50))
         clear_btn.Bind(wx.EVT_BUTTON, self.clear_btn_on_press)
+        
+        out_dir_btn = wx.Button(panel, label='Set Output Directory', pos=(770, 50))
+        out_dir_btn.Bind(wx.EVT_BUTTON, self.out_dir_btn_on_press)
         
         run_btn = wx.Button(panel, label='Run', pos=(900, 50))
         run_btn.Bind(wx.EVT_BUTTON, self.run_btn_on_press)
@@ -67,6 +82,16 @@ class MainFrame(wx.Frame):
 
         openDirDialog.Destroy()
         self.files_label.SetLabel("%s files loaded." % len(images))
+        
+    def out_dir_btn_on_press(self, event):
+        global output_dir
+        openDirDialog = wx.DirDialog(None, "Choose output directory", "",
+                                    wx.DD_DEFAULT_STYLE | wx.DD_DIR_MUST_EXIST)
+        openDirDialog.ShowModal()
+        selected_directory = openDirDialog.GetPath()
+        output_dir = selected_directory
+        openDirDialog.Destroy()
+        self.out_dir.SetLabel("%s" % selected_directory)
 
     def clear_btn_on_press(self, event):
         global images
@@ -75,7 +100,16 @@ class MainFrame(wx.Frame):
         
     def run_btn_on_press(self, event):
         global images
-        detect.detect_licenseplates(images, 'output/')
+        if(images == []):
+            dlg = wx.MessageDialog(None, "No files selected.",'Message',wx.OK | wx.ICON_QUESTION)
+            result = dlg.ShowModal()
+        elif(output_dir == ""):
+                dlg = wx.MessageDialog(None, "No output directory selected.",'Message',wx.OK | wx.ICON_QUESTION)
+                result = dlg.ShowModal()
+        else:
+            detect.detect_licenseplates(images, output_dir)
+                
+        
 
 
 if __name__ == '__main__':
