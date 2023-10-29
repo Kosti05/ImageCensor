@@ -2,7 +2,7 @@ import wx
 import os
 import detect
 
-version = "0.2"
+version = "0.3"
 
 images = []
 output_dir = ""
@@ -107,7 +107,9 @@ class MainFrame(wx.Frame):
                 dlg = wx.MessageDialog(None, "No output directory selected.",'Message',wx.OK | wx.ICON_QUESTION)
                 result = dlg.ShowModal()
         else:
-            detect.detect_licenseplates(images, output_dir)
+            detect.detect_licenseplates(images, output_dir, self)
+            images = []
+            self.files_label.SetLabel("%s files loaded." % len(images))
                 
         
 

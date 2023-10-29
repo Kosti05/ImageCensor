@@ -2,8 +2,13 @@ import torch
 import cv2
 import numpy as np
 import os
+import wx
 
-def detect_licenseplates(images, output):
+def detect_licenseplates(images, output, self):
+    
+    progress = wx.ProgressDialog("Censoring in progress", "please wait", maximum=100, parent=self, style=wx.PD_SMOOTH|wx.PD_AUTO_HIDE)
+    percent = 0
+    progress.Update(percent)
     
     # Step 1: Load the YOLO model from a .pt file
     model_path = 'models\\best.pt'  # Replace with the path to your YOLO model
@@ -16,9 +21,12 @@ def detect_licenseplates(images, output):
         os.mkdir(output) 
     except FileExistsError as error: 
         None
-    
+        
+    percent_per_image = int(100 / len(images))
     # Step 2: Load and process the input image
     for image in images:
+        percent += percent_per_image
+        progress.Update(percent)
         img = cv2.imread(image)
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         h, w, c = img.shape
@@ -50,3 +58,4 @@ def detect_licenseplates(images, output):
         # Save the modified image with the blurred bounding boxes
         output_image_path = os.path.join(output, os.path.basename(image))
         cv2.imwrite(output_image_path, img_with_blur)
+    progress.Destroy()
