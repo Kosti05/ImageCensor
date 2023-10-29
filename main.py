@@ -74,7 +74,6 @@ class MainFrame(wx.Frame):
         openDirDialog.ShowModal()
         selected_directory = openDirDialog.GetPath()
         print("Selected Directory:", selected_directory)
-        # Print the list of files
         for file in os.listdir(selected_directory):
             if os.path.isfile(os.path.join(selected_directory, file)):
                 print("File:", file)

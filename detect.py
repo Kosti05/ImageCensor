@@ -11,7 +11,7 @@ def detect_licenseplates(images, output, self):
     progress.Update(percent)
     
     # Step 1: Load the YOLO model from a .pt file
-    model_path = 'models\\best.pt'  # Replace with the path to your YOLO model
+    model_path = 'models\\best.pt'
     model = torch.hub.load('ultralytics/yolov5:master', 'custom', path=model_path)  # 'custom' model for loading from a .pt file
     model.eval()
     classes = model.names
