@@ -2,7 +2,7 @@ import wx
 import os
 import detect
 
-version = "0.3"
+version = "1.0"
 
 images = []
 output_dir = ""
