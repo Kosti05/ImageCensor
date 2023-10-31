@@ -3,6 +3,29 @@ import cv2
 import numpy as np
 import os
 import wx
+from threading import Thread
+
+from PIL import Image, ExifTags
+
+def copy_exif_data(source_path, target_path):
+    # Open the source image to extract EXIF data
+    source_image = Image.open(source_path)
+
+    # Extract the EXIF data from the source image
+    exif_data = source_image._getexif()
+
+    if exif_data:
+        exif_binary = source_image.info["exif"]
+        
+        # Open the target image
+        target_image = Image.open(target_path)
+
+        # Apply the EXIF data to the target image
+        target_image.save(target_path, exif=exif_binary)
+
+        print("EXIF data copied from source to target image.")
+    else:
+        print("No EXIF data found in the source image.")
 
 def detect_licenseplates(images, output, self):
     progress = wx.ProgressDialog("Censoring in progress", "please wait", maximum=100, parent=self, style=wx.PD_SMOOTH|wx.PD_AUTO_HIDE)
@@ -18,9 +41,11 @@ def detect_licenseplates(images, output, self):
         None
     percent_per_image = int(100 / len(images))
     
+    current_image = 0
     for image in images:
+        current_image += 1
         percent += percent_per_image
-        progress.Update(percent)
+        progress.Update(percent,  "Image %s/%s" % (current_image, len(images)))
         img = cv2.imread(image)
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         h, w, c = img.shape
@@ -37,6 +62,8 @@ def detect_licenseplates(images, output, self):
         
         output_image_path = os.path.join(output, os.path.basename(image))
         cv2.imwrite(output_image_path, img_with_blur)
+        thread = Thread(target=copy_exif_data, args=(image, output_image_path))
+        thread.start()
     progress.Destroy()
 
 def detect_faces(images, output, self):
@@ -53,9 +80,11 @@ def detect_faces(images, output, self):
         None
     percent_per_image = int(100 / len(images))
     
+    current_image = 0
     for image in images:
+        current_image += 1
         percent += percent_per_image
-        progress.Update(percent)
+        progress.Update(percent,  "Image %s/%s" % (current_image, len(images)))
         img = cv2.imread(image)
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         h, w, c = img.shape
@@ -67,7 +96,7 @@ def detect_faces(images, output, self):
             box = [int(obj.iloc[0]), int(obj.iloc[1]), int(obj.iloc[2]), int(obj.iloc[3])]
             x1, y1, x2, y2 = box
             roi = img[y1:y2, x1:x2]
-            blurred_roi = cv2.GaussianBlur(roi, (21, 21), 0)
+            blurred_roi = cv2.GaussianBlur(roi, (51, 51), 0)
             img_with_blur[y1:y2, x1:x2] = blurred_roi
 
         output_image_path = os.path.join(output, os.path.basename(image))
@@ -75,7 +104,7 @@ def detect_faces(images, output, self):
     progress.Destroy()
 
 def detect_both(images, output, self):
-    progress = wx.ProgressDialog("Censoring in progress", "please wait", maximum=100, parent=self, style=wx.PD_SMOOTH|wx.PD_AUTO_HIDE)
+    progress = wx.ProgressDialog("Censoring in progress", "", maximum=100, parent=self, style=wx.PD_SMOOTH|wx.PD_AUTO_HIDE)
     percent = 0
     progress.Update(percent)
     model1_path = 'models\\faces.pt'
@@ -89,10 +118,11 @@ def detect_both(images, output, self):
     except FileExistsError as error: 
         None
     percent_per_image = int(100 / len(images))
-    
+    current_image = 0
     for image in images:
+        current_image += 1
         percent += percent_per_image
-        progress.Update(percent)
+        progress.Update(percent,  "Image %s/%s" % (current_image, len(images)))
         img = cv2.imread(image)
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         h, w, c = img.shape
@@ -113,7 +143,7 @@ def detect_both(images, output, self):
             box = [int(obj.iloc[0]), int(obj.iloc[1]), int(obj.iloc[2]), int(obj.iloc[3])]
             x1, y1, x2, y2 = box
             roi = img[y1:y2, x1:x2]
-            blurred_roi = cv2.GaussianBlur(roi, (21, 21), 0)
+            blurred_roi = cv2.GaussianBlur(roi, (51, 51), 0)
             img_with_blur[y1:y2, x1:x2] = blurred_roi
 
         output_image_path = os.path.join(output, os.path.basename(image))
