@@ -3,5 +3,5 @@ opencv_python==4.8.1.78
 opencv_python_headless==4.8.0.74
 Pillow==10.1.0
 Pillow==10.1.0
-torch==2.1.0+cu121
 wxPython==4.2.1
+-r requirements2.txt
