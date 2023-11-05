@@ -101,6 +101,8 @@ def detect_faces(images, output, self):
 
         output_image_path = os.path.join(output, os.path.basename(image))
         cv2.imwrite(output_image_path, img_with_blur)
+        thread = Thread(target=copy_exif_data, args=(image, output_image_path))
+        thread.start()
     progress.Destroy()
 
 def detect_both(images, output, self):
@@ -148,4 +150,6 @@ def detect_both(images, output, self):
 
         output_image_path = os.path.join(output, os.path.basename(image))
         cv2.imwrite(output_image_path, img_with_blur)
+        thread = Thread(target=copy_exif_data, args=(image, output_image_path))
+        thread.start()
     progress.Destroy()
