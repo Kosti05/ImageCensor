@@ -26,6 +26,10 @@ def copy_exif_data(source_path, target_path):
         print("EXIF data copied from source to target image.")
     else:
         print("No EXIF data found in the source image.")
+        
+def save_image(output_path, img, source_path):
+    cv2.imwrite(output_path, img)
+    copy_exif_data(source_path, output_path)
 
 def detect_licenseplates(images, output, self):
     progress = wx.ProgressDialog("Censoring in progress", "please wait", maximum=100, parent=self, style=wx.PD_SMOOTH|wx.PD_AUTO_HIDE)
@@ -61,9 +65,9 @@ def detect_licenseplates(images, output, self):
             img_with_blur[y1:y2, x1:x2] = blurred_roi
         
         output_image_path = os.path.join(output, os.path.basename(image))
-        cv2.imwrite(output_image_path, img_with_blur)
-        thread = Thread(target=copy_exif_data, args=(image, output_image_path))
-        thread.start()
+        save_image(output_image_path, img_with_blur, image)
+        thread = Thread(target=save_image, args=(output_image_path, img_with_blur, image))
+        thread.start()  
     progress.Destroy()
 
 def detect_faces(images, output, self):
@@ -100,9 +104,9 @@ def detect_faces(images, output, self):
             img_with_blur[y1:y2, x1:x2] = blurred_roi
 
         output_image_path = os.path.join(output, os.path.basename(image))
-        cv2.imwrite(output_image_path, img_with_blur)
-        thread = Thread(target=copy_exif_data, args=(image, output_image_path))
-        thread.start()
+        save_image(output_image_path, img_with_blur, image)
+        thread = Thread(target=save_image, args=(output_image_path, img_with_blur, image))
+        thread.start()  
     progress.Destroy()
 
 def detect_both(images, output, self):
@@ -149,7 +153,7 @@ def detect_both(images, output, self):
             img_with_blur[y1:y2, x1:x2] = blurred_roi
 
         output_image_path = os.path.join(output, os.path.basename(image))
-        cv2.imwrite(output_image_path, img_with_blur)
-        thread = Thread(target=copy_exif_data, args=(image, output_image_path))
-        thread.start()
+        save_image(output_image_path, img_with_blur, image)
+        thread = Thread(target=save_image, args=(output_image_path, img_with_blur, image))
+        thread.start()  
     progress.Destroy()
