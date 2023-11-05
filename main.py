@@ -77,8 +77,10 @@ class MainFrame(wx.Frame):
         openDirDialog.ShowModal()
         selected_directory = openDirDialog.GetPath()
         for file in os.listdir(selected_directory):
-            if os.path.isfile(os.path.join(selected_directory, file)):
-                images.append("%s\\%s" % (selected_directory, file))
+            path = os.path.join(selected_directory, file)
+            if os.path.isfile(path):
+                if path.endswith(".jpg") or path.endswith(".jpeg") or path.endswith(".png") or  path.endswith(".JPG"):
+                    images.append("%s\\%s" % (selected_directory, file))
 
         openDirDialog.Destroy()
         self.files_label.SetLabel("%s files loaded." % len(images))
